@@ -26,6 +26,7 @@ elements.form.addEventListener('submit', async event => {
 
     elements.gallery.innerHTML = '<span class="loader"></span>';
     elements.form.reset();
+    elements.loadMoreBtn.style.display = 'none'; 
 
     try {
         const { data } = await fetchImages(searchQuery, page, perPage);
@@ -37,15 +38,12 @@ elements.form.addEventListener('submit', async event => {
                 backgroundColor: '#ef4040',
                 position: 'topRight',
             });
-            elements.loadMoreBtn.style.display = 'none';
         } else {
             elements.gallery.innerHTML = renderGallery(data.hits);
             lightbox.refresh();
 
             if (page * perPage < data.totalHits) {
                 elements.loadMoreBtn.style.display = 'block';
-            } else {
-                elements.loadMoreBtn.style.display = 'none';
             }
         }
     } catch (error) {
@@ -59,6 +57,8 @@ elements.form.addEventListener('submit', async event => {
 
 elements.loadMoreBtn.addEventListener('click', async () => {
     page += 1;
+    elements.loadMoreBtn.disabled = true; 
+    elements.loadMoreBtn.innerHTML = '<span class="loader"></span>'; 
 
     try {
         const { data } = await fetchImages(searchQuery, page, perPage);
@@ -76,9 +76,13 @@ elements.loadMoreBtn.addEventListener('click', async () => {
             });
         }
     } catch (error) {
+        elements.loadMoreBtn.style.display = 'none';
         iziToast.error({
             message: 'Something went wrong. Please try again later.',
             position: 'topRight',
         });
+    } finally {
+        elements.loadMoreBtn.disabled = false;
+        elements.loadMoreBtn.innerHTML = 'Load More';
     }
 });
